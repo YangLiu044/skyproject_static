@@ -218,7 +218,7 @@
       btn.disabled = true; btn.textContent = "Uploading…";
 
       try {
-        const res = await fetch(`${BACKEND_BASE}/api/upload`, { method: "POST", body: fd });
+        const res = await fetch(`${BACKEND_BASE}/api/upload`, { method: "POST", body: fd, mode: "cors" });
         if (!res.ok) {
           const t = await res.text().catch(()=> "");
           throw new Error(`Upload failed: ${res.status}${t ? " " + t : ""}`);
