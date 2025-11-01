@@ -1,0 +1,127 @@
+# 🌍 看看你那里的天空  
+*LOOK AT THE SKY WHERE YOU ARE — 一个基于 IPFS 的全球去中心化天空档案计划*
+
+> **“每一片天空，都是一个世界的时间戳；每一次上传，都是一次存在的证明。”**
+
+本项目邀请世界各地的人们上传 **此刻头顶的天空**，并填写 **姓名、所在地、此时的想法/心情**。  
+所有图片与元信息通过 **4EVERLAND** 自动存储并 **Pin 到 IPFS**，生成唯一 **CID（内容寻址标识符）**。  
+任何人都可以通过任意 IPFS 网关访问这些图像，而不是依赖某个中心化服务器或平台。
+
+✅ 不依赖中心化云存储  
+✅ 每张图片都有不可伪造的 CID  
+✅ 任意 IPFS 网关可长期访问  
+✅ 数据可被他人复刻、验证、重混 → 去平台化记忆  
+
+---
+
+## 🔗 在线体验
+网站入口（托管于 4EVERLAND 静态页面）：
+
+https://skyproject_static-xux1ub50-yangliu044.4everland.app/
+
+
+
+## 📌 项目概念
+天空是人类唯一共同抬头时共享的视觉场域，它不属于任何国家、公司或数据库。  
+本项目将天空转化为一种 **去中心化、不可删除、可永久引用的公共档案**。
+
+它不是社交网络，不追求点赞或算法曝光；  
+它是一种分布式记录方式：  
+**“我在某时某地真实存在过。”**
+
+---
+
+## 🛰 为什么使用 IPFS + 4EVERLAND？
+
+| 传统存储 | 去中心化存储 |
+|----------|--------------|
+| URL 指向服务器位置 | CID 指向内容本身 |
+| 平台可删除、屏蔽、闭源 | 内容分布到节点网络，不依赖单一主机 |
+| 需信任平台 | 只需信任哈希 |
+| 数据迁移即链接失效 | IPFS 可跨网关永久访问 |
+
+可访问示例网关：
+https://ipfs.4everland.io/ipfs/
+<CID>
+https://ipfs.io/ipfs/
+<CID>
+https://dweb.link/ipfs/
+<CID>
+
+---
+
+## 🧱 系统架构（简述）
+
+前端：静态 HTML/JS（无密钥）
+↓
+后端：Vercel Serverless API（安全代理上传）
+↓
+存储：4EVERLAND S3 Bucket（自动 Pin 到 IPFS）
+↓
+结果：生成 CID，可通过任意网关访问
+
+架构图见：`/assets/architecture.svg`
+
+---
+
+## 🛠 技术栈
+
+| 层级 | 使用技术 |
+|------|----------|
+| 前端 | Vanilla JS + HTML/CSS |
+| 后端 | Vercel Serverless Functions（Node.js） |
+| 存储 | 4EVERLAND S3 endpoint + 自动 IPFS Pin |
+| 上传 SDK | `@aws-sdk/client-s3` |
+| 表单解析 | `busboy` |
+
+---
+
+## 🧬 元信息结构
+
+| 字段 | 类型 | 示例 |
+|-------|------|------|
+| name | string | `"Alice"` |
+| location | string | `"Tokyo, Japan"` |
+| thoughts | string | `"云层很低，像温柔的屋顶。"` |
+| uploaded_at | ISO 时间戳 | `"2025-01-06T10:22:11Z"` |
+
+---
+
+## 📡 API 说明
+
+### `POST /api/upload`  
+上传天空图片与元信息 → 返回 CID
+
+字段：
+file (必填)
+name
+location
+thoughts
+
+返回示例：
+```json
+{
+  "ok": true,
+  "cid": "bafybeid4jk2jxyw...",
+  "gateway": "https://ipfs.4everland.io/ipfs/bafy...",
+  "name": "Alice",
+  "location": "Tokyo, Japan",
+  "thoughts": "It looks like rain today."
+}
+📦 本地部署
+前端
+
+托管 index.html 到任意静态服务即可
+（4EVERLAND / GitHub Pages / Vercel / IPFS 网关皆可）
+
+📝 许可与署名
+
+授权协议：MIT License（可自由使用、修改、再创作）
+
+作者 / 发起人：Yang Liu（杨柳）
+
+技术支持：IPFS · 4EVERLAND · Vercel
+
+若用于展览、出版或学术引用，请保留署名与项目链接。
+愿你所在之处也有一片好看的天空。
+Look up, upload, and let the sky store itself.
