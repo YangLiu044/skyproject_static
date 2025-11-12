@@ -1,327 +1,130 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Look at the Sky Where You Are</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="color-scheme" content="dark" />
-  <style>
-    :root {
-      --bg: #111;
-      --fg: #f5f5f5;
-      --muted: #a9a9a9;
-      --line: #2a2a2a;
-      --panel: #1a1a1a;
-      --accent: #e8e8e8;
-      --accent-weak: #cfcfcf;
-    }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--fg);
-      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
-      line-height: 1.55;
-      display: grid;
-      grid-template-rows: auto 1fr auto;
-      gap: 18px;
-      padding: 56px 16px 96px;
-      place-items: start center;
-    }
-    header { text-align: center; max-width: 720px; }
-    h1 {
-      margin: 0 0 8px;
-      font-weight: 500;
-      font-size: 22px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-    }
-    p.subtitle { margin: 0; color: var(--muted); }
-    .grid {
-      width: 100%;
-      max-width: 1080px;
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 18px;
-      margin-top: 24px;
-    }
-    @media (min-width: 960px) {
-      .grid { grid-template-columns: 1fr 1fr; }
-    }
-    .card {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 18px;
-      width: 100%;
-    }
-    label { font-size: 12px; color: var(--muted); letter-spacing: .4px; display:block; margin-bottom:6px; }
-    input[type="text"], textarea {
-      width: 100%;
-      border: 1px solid var(--line);
-      background: #161616;
-      color: var(--fg);
-      border-radius: 10px;
-      padding: 10px 12px;
-      font-size: 14px;
-      outline: none;
-    }
-    textarea { min-height: 92px; resize: vertical; }
-    .file {
-      border: 1px dashed var(--line);
-      background: #141414;
-      border-radius: 10px;
-      padding: 12px;
-    }
-    input[type="file"] { color-scheme: dark; width: 100%; }
-    .row { display: grid; gap: 12px; }
-    .row.two { grid-template-columns: 1fr; }
-    @media (min-width: 640px) { .row.two { grid-template-columns: 1fr 1fr; } }
-    button {
-      width: 100%;
-      border: none;
-      border-radius: 10px;
-      padding: 12px 14px;
-      background: var(--accent);
-      color: #111;
-      font-weight: 600;
-      cursor: pointer;
-      transition: filter .15s ease;
-    }
-    button:hover { filter: brightness(92%); }
-    button.ghost {
-      background: #1a1a1a;
-      color: var(--accent-weak);
-      border: 1px solid var(--line);
-    }
-    .note { margin-top: 10px; font-size: 12px; color: var(--muted); text-align: center; }
-    .result, .error {
-      margin-top: 14px;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 14px;
-      word-break: break-word;
-      font-size: 14px;
-    }
-    .error { color: #ff6b6b; background:#151214; border-color:#3a2022; }
-    .result a { color: var(--accent-weak); text-decoration: underline; }
-    .cid {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: center;
-      gap: 8px;
-      word-break: break-all;
-      background:#141414; border:1px solid var(--line); border-radius:8px; padding:8px 10px;
-    }
-    .copy {
-      border: 1px solid var(--line);
-      background:#1b1b1b; color: var(--fg);
-      border-radius:8px; padding:6px 10px; cursor:pointer;
-    }
-    .gallery-item {
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 12px;
-      background: #141414;
-      margin-bottom: 12px;
-    }
-    .gallery-item img { width: 100%; border-radius: 8px; margin: 8px 0; display:block; }
-    footer { color: var(--muted); font-size: 12px; text-align: center; }
-    .hidden { display: none !important; }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>Look at the Sky Where You Are</h1>
-    <p class="subtitle">
-      Share the sky above you right now — your name, location, and your current thoughts and feelings.
-    </p>
-  </header>
+<script>
+  const BACKEND_BASE = "https://api.yangliu.studio"; // 不要以 / 结尾
 
-  <main class="grid">
-    <!-- Upload -->
-    <section class="card">
-      <form id="skyForm" class="row">
-        <div class="row two">
-          <div>
-            <label for="name">Name</label>
-            <input id="name" type="text" placeholder="Your name" required />
-          </div>
-          <div>
-            <label for="location">Location</label>
-            <input id="location" type="text" placeholder="City, Country" required />
-          </div>
-        </div>
+  const $ = (sel) => document.querySelector(sel);
+  const show = (el, html="") => { el.classList.remove("hidden"); if (html) el.innerHTML = html; };
+  const hide = (el) => { el.classList.add("hidden"); el.innerHTML = ""; };
 
-        <div>
-          <label for="thoughts">Current Thoughts and Feelings</label>
-          <textarea id="thoughts" placeholder="What are you thinking and feeling right now?" required></textarea>
-        </div>
+  const form = $("#skyForm");
+  const btn  = $("#submitBtn");
+  const out  = $("#result");
+  const err  = $("#error");
 
-        <div class="file">
-          <label for="file">Sky Image</label>
-          <input id="file" type="file" accept="image/*" required />
-        </div>
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    hide(out); hide(err);
 
-        <button id="submitBtn" type="submit">Upload to IPFS</button>
-        <div class="note">No API keys in the browser. Uploads go through a secure backend.</div>
-      </form>
+    const name = $("#name").value.trim();
+    const location = $("#location").value.trim();
+    const thoughts = $("#thoughts").value.trim();
+    const file = $("#file").files[0];
+    if (!file) { show(err, "Please choose an image of your sky."); return; }
 
-      <div id="result" class="result hidden"></div>
-      <div id="error" class="error hidden"></div>
-    </section>
+    const fd = new FormData();
+    fd.append("file", file, file.name);
+    fd.append("name", name);
+    fd.append("location", location);
+    fd.append("thoughts", thoughts);
 
-    <!-- Gallery -->
-    <section class="card">
-      <div class="row">
-        <button id="loadGalleryBtn" class="ghost">View Gallery</button>
-        <div id="gallery" class="result hidden"></div>
-      </div>
-    </section>
-  </main>
-
-  <footer>© 2025 Look at the Sky Project</footer>
-
-  <script>
-    // —— Backend base (Vercel) ——————————————————————————————
-    const BACKEND_BASE = "https://api.yangliu.studio";
-
-    // —— Helpers ————————————————————————————————————————
-    const $ = (sel) => document.querySelector(sel);
-    const show = (el, html="") => { el.classList.remove("hidden"); if (html) el.innerHTML = html; };
-    const hide = (el) => { el.classList.add("hidden"); el.innerHTML = ""; };
-
-    // —— Upload logic ————————————————————————————————
-    const form = $("#skyForm");
-    const btn  = $("#submitBtn");
-    const out  = $("#result");
-    const err  = $("#error");
-
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      hide(out); hide(err);
-
-      const name = $("#name").value.trim();
-      const location = $("#location").value.trim();
-      const thoughts = $("#thoughts").value.trim();
-      const file = $("#file").files[0];
-
-      if (!file) { show(err, "Please choose an image of your sky."); return; }
-
-      const fd = new FormData();
-      fd.append("file", file, file.name);
-      fd.append("name", name);
-      fd.append("location", location);
-      fd.append("thoughts", thoughts);
-
-      btn.disabled = true; btn.textContent = "Uploading…";
-
-      try {
-        const res = await fetch(`${BACKEND_BASE}/api/upload`, { method: "POST", body: fd, mode: "cors" });
-        if (!res.ok) {
-          const t = await res.text().catch(()=> "");
-          throw new Error(`Upload failed: ${res.status}${t ? " " + t : ""}`);
-        }
-        const data = await res.json();
-        const cid = data.cid || data.value?.cid || data.Hash;
-        if (!cid) throw new Error("No CID returned by backend.");
-        const gateway = data.gateway || `https://ipfs.4everland.io/ipfs/${cid}`;
-
-        show(out, `
-          <div>✅ <strong>Upload successful!</strong></div>
-          <div style="margin-top:6px;"><strong>Name:</strong> ${escapeHtml(name)}</div>
-          <div><strong>Location:</strong> ${escapeHtml(location)}</div>
-          <div><strong>Thoughts:</strong> ${escapeHtml(thoughts)}</div>
-          <div style="margin-top:10px;">
-            <div class="cid"><code id="cidText">${cid}</code>
-              <button class="copy" onclick="copyCID()">Copy</button>
-            </div>
-          </div>
-          <div style="margin-top:8px;"><a href="${gateway}" target="_blank" rel="noopener">View on IPFS Gateway</a></div>
-        `);
-
-        form.reset();
-      } catch (e) {
-        show(err, String(e.message || e));
-      } finally {
-        btn.disabled = false; btn.textContent = "Upload to IPFS";
+    btn.disabled = true; btn.textContent = "Uploading…";
+    try {
+      const res = await fetch(`${BACKEND_BASE}/upload`, { method: "POST", body: fd, mode: "cors" });
+      if (!res.ok) {
+        const t = await res.text().catch(()=> "");
+        throw new Error(`Upload failed: ${res.status}${t ? " " + t : ""}`);
       }
+      const data = await res.json();
+      const cid = data.cid || data.value?.cid || data.Hash;
+      if (!cid) throw new Error("No CID returned by backend.");
+      const gateway = data.gateway || `https://ipfs.4everland.io/ipfs/${cid}`;
+
+      show(out, `
+        <div>✅ <strong>Upload successful!</strong></div>
+        <div style="margin-top:6px;"><strong>Name:</strong> ${escapeHtml(name)}</div>
+        <div><strong>Location:</strong> ${escapeHtml(location)}</div>
+        <div><strong>Thoughts:</strong> ${escapeHtml(thoughts)}</div>
+        <div style="margin-top:10px;">
+          <div class="cid"><code id="cidText">${cid}</code>
+            <button class="copy" onclick="copyCID()">Copy</button>
+          </div>
+        </div>
+        <div style="margin-top:8px;"><a href="${gateway}" target="_blank" rel="noopener">View on IPFS Gateway</a></div>
+      `);
+      form.reset();
+    } catch (e) {
+      show(err, String(e.message || e));
+    } finally {
+      btn.disabled = false; btn.textContent = "Upload to IPFS";
+    }
+  });
+
+  function copyCID() {
+    const el = document.getElementById("cidText");
+    navigator.clipboard.writeText(el.textContent).then(() => {
+      const b = document.querySelector(".copy");
+      b.textContent = "Copied!";
+      setTimeout(() => (b.textContent = "Copy"), 1200);
     });
+  }
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, c => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[c]));
+  }
 
-    function copyCID() {
-      const el = document.getElementById("cidText");
-      navigator.clipboard.writeText(el.textContent).then(() => {
-        const b = document.querySelector(".copy");
-        b.textContent = "Copied!";
-        setTimeout(() => (b.textContent = "Copy"), 1200);
-      });
+  // —— Gallery ——
+  const gallery = $("#gallery");
+  const loadBtn = $("#loadGalleryBtn");
+  let nextToken = null;
+
+  loadBtn.addEventListener("click", () => loadGallery(false));
+
+  async function loadGallery(append=false) {
+    try {
+      const url = new URL(`${BACKEND_BASE}/list`);
+      url.searchParams.set("limit", "12");
+      if (append && nextToken) url.searchParams.set("token", nextToken);
+
+      const r = await fetch(url, { mode: "cors" });
+      if (!r.ok) throw new Error(`List failed: ${r.status}`);
+      const data = await r.json();
+
+      renderItems(data.items || [], append);
+      nextToken = data.nextToken;
+      if (nextToken) appendLoadMore();
+    } catch (e) {
+      show(gallery, `<div class="error">Failed to load gallery: ${e.message || e}</div>`);
     }
+  }
 
-    function escapeHtml(s) {
-      return s.replace(/[&<>"']/g, c => ({
-        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-      }[c]));
-    }
-
-    // —— Gallery logic ————————————————————————————————
-    const gallery = $("#gallery");
-    const loadBtn = $("#loadGalleryBtn");
-    let nextToken = null;
-
-    loadBtn.addEventListener("click", () => loadGallery(false));
-
-    async function loadGallery(append=false) {
-      try {
-        const url = new URL(`${BACKEND_BASE}/api/list`);
-        url.searchParams.set("limit", "12");
-        if (append && nextToken) url.searchParams.set("token", nextToken);
-
-        const r = await fetch(url);
-        if (!r.ok) throw new Error(`List failed: ${r.status}`);
-        const data = await r.json();
-
-        renderItems(data.items || [], append);
-        nextToken = data.nextToken;
-
-        if (nextToken) {
-          appendLoadMore();
-        }
-      } catch (e) {
-        show(gallery, `<div class="error">Failed to load gallery: ${e.message || e}</div>`);
-      }
-    }
-
-    function renderItems(items, append=false) {
-      if (!append) gallery.innerHTML = "";
-      const html = items.map(it => `
-        <div class="gallery-item">
-          <div style="font-size:13px; color:${'var(--muted)'}; margin-bottom:6px;">
-            <strong>${escapeHtml(it.name || "Anonymous")}</strong> — ${escapeHtml(it.location || "Unknown location")}
-          </div>
-          ${it.gateway ? `<img src="${it.gateway}" alt="sky">` : ""}
-          <div style="font-size:13px; color:#d0d0d0; margin-bottom:6px;">${escapeHtml(it.thoughts || "")}</div>
-          ${it.cid ? `<div class="cid"><code>${it.cid}</code>
-              <a class="copy" href="${it.gateway}" target="_blank" rel="noopener">Open</a>
-            </div>` : ""}
+  function renderItems(items, append=false) {
+    if (!append) gallery.innerHTML = "";
+    const html = items.map(it => `
+      <div class="gallery-item">
+        <div style="font-size:13px; color:${'var(--muted)'}; margin-bottom:6px;">
+          <strong>${escapeHtml(it.name || "Anonymous")}</strong> — ${escapeHtml(it.location || "Unknown location")}
         </div>
-      `).join("");
+        ${it.gateway ? `<img src="${it.gateway}" alt="sky">` : ""}
+        <div style="font-size:13px; color:#d0d0d0; margin-bottom:6px;">${escapeHtml(it.thoughts || "")}</div>
+        ${it.cid ? `<div class="cid"><code>${it.cid}</code>
+            <a class="copy" href="${it.gateway}" target="_blank" rel="noopener">Open</a>
+          </div>` : ""}
+      </div>
+    `).join("");
 
-      show(gallery);
-      gallery.insertAdjacentHTML("beforeend", html);
-    }
+    show(gallery);
+    gallery.insertAdjacentHTML("beforeend", html);
+  }
 
-    function appendLoadMore() {
-      const existing = document.getElementById("loadMoreBtn");
-      if (existing) existing.remove();
-      const btn = document.createElement("button");
-      btn.id = "loadMoreBtn";
-      btn.textContent = "Load more";
-      btn.className = "ghost";
-      btn.style.marginTop = "8px";
-      btn.onclick = () => loadGallery(true);
-      gallery.appendChild(btn);
-    }
-  </script>
-</body>
-</html>
+  function appendLoadMore() {
+    const existing = document.getElementById("loadMoreBtn");
+    if (existing) existing.remove();
+    const btn = document.createElement("button");
+    btn.id = "loadMoreBtn";
+    btn.textContent = "Load more";
+    btn.className = "ghost";
+    btn.style.marginTop = "8px";
+    btn.onclick = () => loadGallery(true);
+    gallery.appendChild(btn);
+  }
+</script>
