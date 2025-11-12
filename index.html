@@ -126,6 +126,14 @@
       background: #141414;
       margin-bottom: 12px;
     }
+    .terms {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--muted);
+  border-top: 1px solid var(--line);
+  margin-top: 14px;
+  padding-top: 8px;
+}
     .gallery-item img { width: 100%; border-radius: 8px; margin: 8px 0; display:block; }
     footer { color: var(--muted); font-size: 12px; text-align: center; }
     .hidden { display: none !important; }
@@ -167,6 +175,17 @@
         <button id="submitBtn" type="submit">Upload to IPFS</button>
         <div class="note">No API keys in the browser. Uploads go through a secure backend.</div>
       </form>
+      <p class="terms">
+  By uploading, you confirm that you hold the rights to this image and text.  
+  You <strong>irrevocably grant</strong> the project and its operators a
+  <strong>worldwide, perpetual, royalty-free, sublicensable license</strong>
+  to use, reproduce, display, distribute, and adapt the submitted content for
+  artistic, research, educational, and promotional purposes.  
+  You understand that all materials may be stored on a <strong>decentralized IPFS network</strong>,
+  publicly accessible and beyond the full control of this site.  
+  By submitting, you acknowledge and <strong>waive any moral rights</strong> (where permitted by law)
+  and agree that the content may be archived, exhibited, and reused as part of this open art project.
+</p>
 
       <div id="result" class="result hidden"></div>
       <div id="error" class="error hidden"></div>
